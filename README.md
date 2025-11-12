@@ -1,20 +1,3 @@
-#docsearch_pt_ready/
-#│
-#├── app.py
-#├── ingest.py
-#├── config.json
-#├── requirements.txt
-#├── README.md
-#├── .gitignore
-#│
-#├── incoming/            ← onde colocas os ficheiros a indexar
-#├── templates/
-#│   ├── index.html
-#│   ├── progress.html
-#│   └── settings.html
-#└── static/
-
-
 # --- Framework Web ---
 fastapi
 uvicorn
