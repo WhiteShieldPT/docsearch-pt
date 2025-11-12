@@ -1,30 +1,63 @@
+docsearch_pt_ready/
+│
+├── app.py
+├── ingest.py
+├── config.json
+├── requirements.txt
+├── README.md
+├── .gitignore
+│
+├── incoming/            ← onde colocas os ficheiros a indexar
+├── templates/
+│   ├── index.html
+│   ├── progress.html
+│   └── settings.html
+└── static/
 
-DocSearch PT – Upgrade de OCR/AI
+# --- Framework Web ---
+fastapi
+uvicorn
+jinja2
+python-multipart
 
-Este upgrade privilegia qualidade máxima de reconhecimento de faturas:
-- Mantém Tika para texto nativo.
-- OCR híbrido: Tesseract (afinando OEM/PSM/DPI) + EasyOCR (fallback).
-- Extração de entidades com IA (spaCy NER) para preencher lacunas.
+# --- Pesquisa / Base de dados ---
+elasticsearch
 
-1) Pré‑requisitos
-- Tesseract instalado (Windows: C:\Program Files\Tesseract-OCR\tesseract.exe).
-- (Opcional) Apache Tika em http://localhost:9998/tika.
+# --- Extração e OCR ---
+pdfplumber
+pypdfium2
+pytesseract
+pillow
 
-2) Instalar dependências
-    pip install -r requirements-ocr-ai.txt
-    python -m spacy download pt_core_news_md
+# --- Utilitários ---
+unicodedata2  # normalização de texto (opcional)
 
-   Se torch der erro, siga instruções em https://pytorch.org/get-started/locally/
 
-3) Substituir o ficheiro
-- Copie este ingest.py para a raiz do projeto (onde está o atual).
+# 📄 DocSearch PT Ready
 
-4) Executar
-    python ingest.py <pasta_com_documentos>
-ou use o botão "Atualizar Documentos" na UI.
+Sistema de indexação e pesquisa de documentos com OCR e metadados — 100% Python + Elasticsearch + Tesseract.
 
-Dicas
-- Tesseract: --oem 3 --psm 6 --dpi 300
-- PDF render scale=2.5 (equilíbrio).
+---
 
-Bom trabalho! 🚀
+## 🚀 Funcionalidades
+- Interface web (FastAPI + Jinja2)
+- Extração automática de texto de PDFs e imagens
+- OCR com Tesseract
+- Indexação e pesquisa full-text com Elasticsearch
+- Extração automática de NIF, IBAN, datas, totais, número de fatura, fornecedor e cliente
+
+---
+
+## ⚙️ Requisitos
+
+### 🔹 Sistema
+- **Python 3.11+**
+- **Elasticsearch 8.x**  
+  (instalar ou usar via Docker)
+- **Tesseract OCR**  
+  (Windows: [tesseract-ocr.github.io/tessdoc/Downloads](https://tesseract-ocr.github.io/tessdoc/Downloads))
+
+### 🔹 Bibliotecas Python
+Instala todas com:
+```bash
+pip install -r requirements.txt
