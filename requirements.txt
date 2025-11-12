@@ -1,0 +1,40 @@
+# ================================
+# DocSearch PT - Full Requirements
+# ================================
+# Inclui: WebApp (FastAPI + UI) + OCR + Tika + Elasticsearch + AI (spaCy/EasyOCR)
+# --------------------------------
+
+# --- Web / API ---
+fastapi
+uvicorn
+jinja2
+python-dotenv
+requests
+
+# --- OCR / Extração de texto ---
+pytesseract
+tika
+pdfplumber
+pypdfium2
+Pillow
+easyocr
+torch
+numpy
+
+# --- NLP / AI ---
+spacy
+pt_core_news_md @ https://github.com/explosion/spacy-models/releases/download/pt_core_news_md-3.7.0/pt_core_news_md-3.7.0.tar.gz
+
+# --- Elasticsearch ---
+elasticsearch
+
+# --- Utilidades ---
+python-magic
+dateparser
+chardet
+regex
+tqdm
+
+# --- (Opcional) Desenvolvimento / Logging ---
+colorama
+rich

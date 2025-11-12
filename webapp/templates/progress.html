@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indexação em progresso - DocSearch PT</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #2563eb;
+            --secondary: #10b981;
+            --danger: #dc2626;
+            --radius: 12px;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.95);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --gradient-start: #111827;
+            --gradient-end: #020617;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+            --gradient-start: #f1f5f9;
+            --gradient-end: #e0e7ff;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            color: var(--text-primary); 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            transition: background 0.3s ease;
+        }
+
+        .progress-container {
+            max-width: 600px;
+            width: 100%;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #22c55e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-box {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 50px;
+            background: var(--bg-primary);
+            border-radius: 999px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 1rem;
+            border: 2px solid var(--border);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #22c55e, #3b82f6);
+            border-radius: 999px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            min-width: 50px;
+        }
+
+        .status {
+            text-align: center;
+            font-size: 1.15rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .status.running {
+            background: rgba(37, 99, 235, 0.15);
+            color: #60a5fa;
+        }
+
+        .status.completed {
+            background: rgba(16, 185, 129, 0.15);
+            color: #22c55e;
+        }
+
+        .status.error {
+            background: rgba(185, 28, 28, 0.15);
+            color: #ef4444;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.875rem 1.75rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: #1e40af;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .log-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: ui-monospace, monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .log-container.show {
+            display: block;
+        }
+
+        .file-counter {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin: 1.5rem 0;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <span id="themeIcon">🌙</span>
+        <span id="themeText">Escuro</span>
+    </button>
+
+    <div class="progress-container">
+        <h1>📊 Indexação em Progresso</h1>
+        <p class="subtitle">Aguarde enquanto os documentos são processados...</p>
+
+        <div id="statusMessage" class="status running">
+            <span class="spinner"></span>
+            <span id="statusText">Iniciando indexação...</span>
+        </div>
+
+        <div class="info-box">
+            <div class="info-row">
+                <span class="info-label">📁 Pasta:</span>
+                <span class="info-value">{{ folder }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">🔍 Modo:</span>
+                <span class="info-value">{% if only_new %}Apenas novos ficheiros{% else %}Todos os ficheiros{% endif %}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">📊 Total de ficheiros:</span>
+                <span class="info-value" id="totalFiles">Calculando...</span>
+            </div>
+        </div>
+
+        <div class="file-counter" id="fileCounter">0 / 0</div>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar" style="width: 0%;">
+                <span id="progressText">0%</span>
+            </div>
+        </div>
+
+        <button class="btn" id="returnBtn" onclick="returnToSearch()" disabled>
+            🔍 Voltar à Pesquisa
+        </button>
+
+        <button class="btn btn-danger" id="cancelBtn" onclick="cancelIndexing()">
+            ❌ Cancelar indexação
+        </button>
+
+        <div class="log-container" id="logContainer"></div>
+    </div>
+
+    <script>
+        // Theme Management
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeButton(newTheme);
+        }
+
+        function updateThemeButton(theme) {
+            const icon = document.getElementById('themeIcon');
+            const text = document.getElementById('themeText');
+            if (theme === 'dark') {
+                icon.textContent = '🌙';
+                text.textContent = 'Escuro';
+            } else {
+                icon.textContent = '☀️';
+                text.textContent = 'Claro';
+            }
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.body.setAttribute('data-theme', savedTheme);
+        updateThemeButton(savedTheme);
+
+        // Progress tracking
+        const taskId = '{{ task_id }}';
+        const folder = {{ folder | tojson }};
+        let pollInterval;
+        let isCompleted = false;
+
+        function updateProgress() {
+            if (!taskId || taskId === '' || taskId === 'None') {
+                document.getElementById('statusText').textContent = '❌ Erro: ID de tarefa inválido';
+                document.getElementById('statusMessage').className = 'status error';
+                document.getElementById('returnBtn').disabled = false;
+                clearInterval(pollInterval);
+                return;
+            }
+
+            fetch(`/api/progress/${taskId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'not_found') {
+                        document.getElementById('statusText').textContent = '⚠️ Tarefa não encontrada';
+                        document.getElementById('statusMessage').className = 'status error';
+                        document.getElementById('returnBtn').disabled = false;
+                        clearInterval(pollInterval);
+                        return;
+                    }
+
+                    const progress = data.progress || 0;
+                    const current = data.current || 0;
+                    const total = data.total || 0;
+
+                    document.getElementById('progressBar').style.width = Math.max(progress, 5) + '%';
+                    document.getElementById('progressText').textContent = progress + '%';
+                    document.getElementById('fileCounter').textContent = `${current} / ${total}`;
+                    document.getElementById('totalFiles').textContent = total;
+
+                    const statusMessage = document.getElementById('statusMessage');
+                    const statusText = document.getElementById('statusText');
+
+                    if (data.status === 'starting') {
+                        statusText.innerHTML = '<span class="spinner"></span> A preparar indexação...';
+                        statusMessage.className = 'status running';
+                    } else if (data.status === 'running') {
+                        statusText.innerHTML = '<span class="spinner"></span> Indexando documentos...';
+                        statusMessage.className = 'status running';
+                    } else if (data.status === 'completed') {
+                        statusText.textContent = '✅ Indexação concluída com sucesso!';
+                        statusMessage.className = 'status completed';
+                        document.getElementById('returnBtn').disabled = false;
+                        clearInterval(pollInterval);
+
+                        if (data.output) {
+                            const logContainer = document.getElementById('logContainer');
+                            logContainer.textContent = data.output;
+                            logContainer.classList.add('show');
+                        }
+
+                        setTimeout(() => returnToSearch(), 3000);
+                    } else if (data.status === 'error') {
+                        statusText.textContent = '❌ Erro durante a indexação';
+                        statusMessage.className = 'status error';
+                        document.getElementById('returnBtn').disabled = false;
+                        clearInterval(pollInterval);
+
+                        if (data.error || data.errors) {
+                            const logContainer = document.getElementById('logContainer');
+                            logContainer.textContent = data.error || data.errors;
+                            logContainer.classList.add('show');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    document.getElementById('statusText').textContent = '⚠️ Erro de comunicação';
+                    document.getElementById('statusMessage').className = 'status error';
+                    document.getElementById('returnBtn').disabled = false;
+                });
+        }
+
+        function returnToSearch() {
+            window.location.href = `/?folder=${encodeURIComponent(folder)}`;
+        }
+
+        if (taskId && taskId !== '' && taskId !== 'None') {
+            updateProgress();
+            pollInterval = setInterval(updateProgress, 500);
+        } else {
+            document.getElementById('statusText').textContent = '❌ Erro: Task ID não foi gerado';
+            document.getElementById('statusMessage').className = 'status error';
+            document.getElementById('returnBtn').disabled = false;
+        }
+        function cancelIndexing() {
+        if (!confirm("Tens a certeza que queres cancelar a indexação atual?")) return;
+
+        fetch(`/api/cancel/${taskId}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('statusText').textContent = data.message || 'Indexação cancelada.';
+                document.getElementById('statusMessage').className = 'status error';
+                document.getElementById('returnBtn').disabled = false;
+                clearInterval(pollInterval);
+            })
+            .catch(err => {
+                alert('Erro ao cancelar: ' + err);
+            });
+        }
+
+    </script>
+</body>
+</html>

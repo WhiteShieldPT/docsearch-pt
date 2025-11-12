@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocSearch PT – Pesquisa</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1e40af;
+            --secondary: #10b981;
+            --secondary-hover: #059669;
+            --danger: #dc2626;
+            --danger-hover: #b91c1c;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --transition: all 0.2s ease;
+        }
+
+        /* Dark Theme (default) */
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-card: rgba(30, 41, 59, 0.95);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #334155;
+            --highlight-bg: rgba(250, 204, 21, 0.25);
+            --gradient-start: #111827;
+            --gradient-end: #020617;
+        }
+
+        /* Light Theme */
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #e2e8f0;
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --highlight-bg: rgba(250, 204, 21, 0.3);
+            --gradient-start: #f1f5f9;
+            --gradient-end: #e0e7ff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .layout {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            margin-bottom: 2rem;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .header-left h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .settings-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 0.5rem 1.25rem;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .settings-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        /* Stats Bar */
+        .top-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .badge {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .badge:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .badge strong {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Messages */
+        .msg {
+            margin-bottom: 1.5rem;
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius);
+            background: rgba(37, 99, 235, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .msg-error {
+            background: rgba(220, 38, 38, 0.1);
+            border-color: rgba(248, 113, 113, 0.3);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 1.75rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .card-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.25rem;
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            box-shadow: var(--shadow);
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger-hover);
+        }
+
+        /* Forms */
+        input[type="text"],
+        input[type="date"],
+        select {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            width: 100%;
+            transition: var(--transition);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        input::placeholder {
+            color: var(--text-muted);
+        }
+
+        label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        /* Search Form */
+        .search-container {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            padding-right: 8rem;
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 0.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* Advanced Filters */
+        details {
+            margin-top: 1rem;
+        }
+
+        summary {
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            padding: 0.5rem;
+            border-radius: var(--radius);
+            transition: var(--transition);
+            user-select: none;
+        }
+
+        summary:hover {
+            color: var(--primary);
+            background: var(--bg-secondary);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        /* Results */
+        .results {
+            margin-top: 0;
+        }
+
+        .result-item {
+            border-top: 1px solid var(--border);
+            padding: 1.25rem 0;
+            transition: var(--transition);
+        }
+
+        .result-item:hover {
+            background: var(--bg-secondary);
+            margin: 0 -1rem;
+            padding: 1.25rem 1rem;
+            border-radius: var(--radius);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .result-title {
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: var(--text-primary);
+        }
+
+        .result-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .result-highlight {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 0.75rem;
+        }
+
+        .result-highlight em {
+            font-style: normal;
+            font-weight: 600;
+            background: var(--highlight-bg);
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+            color: var(--text-primary);
+        }
+
+        .result-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: 0.8rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            margin-right: 0.5rem;
+            background: var(--bg-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .header-left h1 {
+                font-size: 2rem;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .result-header {
+                flex-direction: column;
+            }
+        }
+
+        /* Checkbox styling */
+        input[type="checkbox"] {
+            width: auto;
+            margin-right: 0.5rem;
+            cursor: pointer;
+        }
+
+        /* Loading animation */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body data-theme="dark">
+<div class="layout">
+    <header>
+        <div class="header-bar">
+            <div class="header-left">
+                <h1>📄 DocSearch PT</h1>
+                <p class="subtitle">Pesquisa inteligente de documentos com Elasticsearch + OCR</p>
+            </div>
+            <div class="header-actions">
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span id="themeIcon">🌙</span>
+                    <span id="themeText">Escuro</span>
+                </button>
+                <a href="/settings" class="settings-btn">
+                    <span>⚙️</span>
+                    <span>Definições</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="top-bar">
+            <div class="badge">
+                📁 <strong>{{ local_count }}</strong> ficheiros na pasta
+            </div>
+            <div class="badge">
+                📊 <strong>{{ indexed_count }}</strong> documentos indexados
+            </div>
+        </div>
+    </header>
+
+    {% if msg %}
+        <div class="msg{% if 'Erro' in msg or 'inválida' in msg or '❌' in msg %} msg-error{% endif %}">
+            <span>{% if 'Erro' in msg or '❌' in msg %}⚠️{% else %}ℹ️{% endif %}</span>
+            <span>{{ msg }}</span>
+        </div>
+    {% endif %}
+
+    <div class="grid">
+        <!-- Coluna esquerda: Pesquisa -->
+        <div>
+            <div class="card">
+                <h2 class="card-title">🔍 Pesquisa Universal</h2>
+                <p class="card-subtitle">Escreve NIF, nome, nº fatura, valor ou qualquer texto</p>
+
+                <form method="get" action="/" id="universalSearchForm">
+                    <div class="search-container">
+                        <input type="text"
+                               name="universal"
+                               id="universalSearch"
+                               class="search-input"
+                               placeholder="🔎 NIF, nº fatura, texto, valor..."
+                               value="{{ universal|default('')|e }}">
+                        <button type="submit" class="btn search-btn">
+                            Pesquisar
+                        </button>
+                    </div>
+
+                    <input type="hidden" name="folder" value="{{ current_folder }}">
+
+                    <label style="display: inline-flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" name="exact" value="1" {% if exact %}checked{% endif %}>
+                        Procurar por palavra/frase exata
+                    </label>
+
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">
+                        💡 Dica: se o sistema não acertar na "intenção", ativa a pesquisa exata.
+                    </p>
+                </form>
+
+                <details>
+                    <summary>🔧 Filtros avançados</summary>
+                    <form method="get" action="/">
+                        <div class="filters-grid">
+                            <div>
+                                <label>Texto / nº fatura</label>
+                                <input type="text" name="q" value="{{ q|default('')|e }}">
+                            </div>
+                            <div>
+                                <label>NIF</label>
+                                <input type="text" name="nif" value="{{ nif|default('')|e }}">
+                            </div>
+                            <div>
+                                <label>Data de</label>
+                                <input type="date" name="date_from" value="{{ date_from|default('')|e }}">
+                            </div>
+                            <div>
+                                <label>Data até</label>
+                                <input type="date" name="date_to" value="{{ date_to|default('')|e }}">
+                            </div>
+                            <div>
+                                <label>Total mínimo (€)</label>
+                                <input type="text" name="min_total" value="{{ min_total|default('')|e }}">
+                            </div>
+                            <div>
+                                <label>Total máximo (€)</label>
+                                <input type="text" name="max_total" value="{{ max_total|default('')|e }}">
+                            </div>
+                        </div>
+                        <input type="hidden" name="folder" value="{{ current_folder }}">
+                        <div style="margin-top: 1rem; display: flex; gap: 0.75rem;">
+                            <button type="submit" class="btn">Aplicar filtros</button>
+                            <a href="/?folder={{ current_folder|e }}" class="btn btn-secondary">Limpar</a>
+                        </div>
+                    </form>
+                </details>
+            </div>
+
+            <div class="card results">
+                <h2 class="card-title">📂 Resultados</h2>
+                <p class="card-subtitle">Documentos encontrados</p>
+
+                {% if hits and hits|length > 0 %}
+                    <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1rem;">
+                        <strong>{{ hits|length }}</strong> resultado(s) encontrado(s)
+                    </p>
+
+                    {% for hit in hits %}
+                        {% set doc = hit._source %}
+                        <div class="result-item">
+                            <div class="result-header">
+                                <div>
+                                    <div class="result-title">{{ doc.filename }}</div>
+                                    <div class="result-meta">
+                                        {% if doc.entities.supplier %}👤 {{ doc.entities.supplier }}{% endif %}
+                                        {% if doc.entities.invoice_no %} · Doc: {{ doc.entities.invoice_no }}{% endif %}
+                                        {% if doc.entities.nif %} · NIF: {{ doc.entities.nif }}{% endif %}
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    {% if doc.entities.date %}
+                                        <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                            📅 {{ doc.entities.date }}
+                                        </div>
+                                    {% endif %}
+                                    {% if doc.entities.total %}
+                                        <div style="color: var(--secondary); font-weight: 600; font-size: 1.1rem;">
+                                            {{ '%.2f' % doc.entities.total }} €
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="result-highlight">
+                                {% if hit.highlight and hit.highlight.texto %}
+                                    …{{ hit.highlight.texto[0]|safe }}…
+                                {% else %}
+                                    {{ doc.texto[:250] }}{% if doc.texto|length > 250 %}…{% endif %}
+                                {% endif %}
+                            </div>
+
+                            <div class="result-footer">
+                                <div>
+                                    {% if doc.ocr_engine %}
+                                        <span class="tag">OCR: {{ doc.ocr_engine }}</span>
+                                    {% endif %}
+                                    {% if doc.pages %}
+                                        <span class="tag">{{ doc.pages }} pág.</span>
+                                    {% endif %}
+                                </div>
+                                <a class="btn btn-secondary" href="/view?p={{ doc.path|e }}" target="_blank">
+                                    👁️ Ver ficheiro
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: var(--text-muted); text-align: center; padding: 2rem;">
+                        Nenhum documento encontrado. Tenta ajustar a pesquisa ou verificar a pasta selecionada.
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Coluna direita: Controlos -->
+        <div>
+            <div class="card">
+                <h2 class="card-title">📁 Pasta de trabalho</h2>
+                <p class="card-subtitle">Escolhe a pasta com os documentos a indexar</p>
+
+                <form method="get" action="/">
+                    <label for="folderInput">Caminho da pasta</label>
+                    <input type="text"
+                           id="folderInput"
+                           name="folder"
+                           value="{{ current_folder }}"
+                           placeholder="Ex: C:\Users\andre\Documentos\Faturas">
+                    {% if universal %}
+                        <input type="hidden" name="universal" value="{{ universal|e }}">
+                    {% endif %}
+                    <div style="margin-top: 1rem;">
+                        <button type="submit" class="btn">📂 Definir pasta</button>
+                    </div>
+                </form>
+
+                <div style="margin-top: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: var(--radius); border: 1px solid var(--border);">
+                    <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                        <strong>📂 Pasta atual:</strong>
+                    </div>
+                    <code style="font-size: 0.85rem; word-break: break-all;">{{ current_folder }}</code>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">🔄 Atualizar índice</h2>
+                <p class="card-subtitle">Indexa documentos da pasta atual no Elasticsearch</p>
+                
+                <form method="post" action="/reindex">
+                    <input type="hidden" name="folder" value="{{ current_folder }}">
+                    <label style="display: flex; align-items: center; cursor: pointer; margin-bottom: 1rem;">
+                        <input type="checkbox" name="only_new" value="1" checked>
+                        Indexar apenas ficheiros novos (recomendado)
+                    </label>
+                    <button type="submit" class="btn" style="width: 100%;">
+                        📊 Reindexar documentos
+                    </button>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.75rem;">
+                        💡 Esta operação pode demorar alguns minutos dependendo do número de documentos
+                    </p>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">🧹 Limpar índice</h2>
+                <p class="card-subtitle">Remove documentos indexados á pasta de trabalho</p>
+                
+                <form method="post" action="/delete_index" onsubmit="return confirm('⚠️ Tens a certeza que queres apagar o índice? Esta ação não pode ser revertida!');">
+                    <input type="hidden" name="folder" value="{{ current_folder }}">
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem; padding: 0.75rem; background: var(--bg-secondary); border-radius: 8px; border-left: 3px solid var(--danger);">
+                        ⚠️ <strong>Atenção:</strong> Apaga o índice <strong style="color: var(--danger);">{{ INDEX if INDEX is defined else 'files' }}</strong> na Pasta de Trabalho.<br>
+                        Não elimina ficheiros em disco.
+                    </p>
+                    <button type="submit" class="btn btn-danger" style="width: 100%;">
+                        🗑️ Apagar índice
+                    </button>
+                </form>
+            </div>
+
+            <div class="card" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(16, 185, 129, 0.1)); border: 1px solid var(--primary);">
+                <h2 class="card-title">💡 Dicas rápidas</h2>
+                <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.9rem; line-height: 1.8;">
+                    <li>🔍 A pesquisa universal deteta automaticamente NIFs, faturas e valores</li>
+                    <li>✅ Usa "pesquisa exata" se não encontrares o que procuras</li>
+                    <li>📊 Reindexar regularmente garante que novos ficheiros são encontrados</li>
+                    <li>⚡ Quanto melhor a qualidade dos PDFs, melhor o OCR</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Theme Management - Sincronizado com todas as páginas
+    function toggleTheme() {
+        const body = document.body;
+        const currentTheme = body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        // Aplicar tema
+        body.setAttribute('data-theme', newTheme);
+        
+        // Salvar no localStorage (sincroniza entre páginas)
+        localStorage.setItem('theme', newTheme);
+        
+        // Atualizar botão
+        updateThemeButton(newTheme);
+    }
+
+    function updateThemeButton(theme) {
+        const icon = document.getElementById('themeIcon');
+        const text = document.getElementById('themeText');
+        
+        if (theme === 'dark') {
+            icon.textContent = '🌙';
+            text.textContent = 'Escuro';
+        } else {
+            icon.textContent = '☀️';
+            text.textContent = 'Claro';
+        }
+    }
+
+    // Carregar tema salvo ao abrir a página
+    function loadSavedTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.body.setAttribute('data-theme', savedTheme);
+        updateThemeButton(savedTheme);
+    }
+
+    // Executar ao carregar a página
+    loadSavedTheme();
+
+    // Auto-focus on search input
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('universalSearch');
+        if (searchInput && !searchInput.value) {
+            searchInput.focus();
+        }
+    });
+</script>
+</body>
+</html>
